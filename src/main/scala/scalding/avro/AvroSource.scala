@@ -13,21 +13,24 @@
  *  limitations under the License.
  */
 
- package scalding.avro
+package scalding.avro
 
- import cascading.avro.{PackedAvroScheme, AvroScheme}
- import cascading.flow.FlowDef
- import cascading.tuple.Fields
- import com.twitter.scalding._
- import org.apache.avro.Schema
- import org.apache.avro.specific.SpecificRecord
+import cascading.avro.{PackedAvroScheme, AvroScheme}
+import cascading.flow.FlowDef
+import cascading.tuple.Fields
+import com.twitter.scalding._
+import org.apache.avro.Schema
+import org.apache.avro.specific.SpecificRecord
 
-
+import cascading.scheme.local.TextDelimited
 
 trait UnpackedAvroFileScheme extends Source {
   val schema: Option[Schema]
 
   override def hdfsScheme = HadoopSchemeInstance(new AvroScheme(schema.getOrElse(null)))
+
+  override val localScheme = new TextDelimited(Fields.ALL)
+
 }
 
 trait PackedAvroFileScheme[AvroType] extends Mappable[AvroType] {
