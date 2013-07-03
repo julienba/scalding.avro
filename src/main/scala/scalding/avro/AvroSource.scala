@@ -18,16 +18,20 @@ package scalding.avro
 import cascading.avro.{PackedAvroScheme, AvroScheme}
 import cascading.flow.FlowDef
 import cascading.tuple.Fields
+import cascading.scheme.Scheme
 import com.twitter.scalding._
 import org.apache.avro.Schema
 import org.apache.avro.specific.SpecificRecord
+
+import org.apache.hadoop.mapred.{ RecordReader, OutputCollector, JobConf }
 
 import cascading.scheme.local.TextDelimited
 
 trait UnpackedAvroFileScheme extends Source {
   val schema: Option[Schema]
 
-  override def hdfsScheme = HadoopSchemeInstance(new AvroScheme(schema.getOrElse(null)))
+  override def hdfsScheme: Scheme[JobConf,RecordReader[_,_],OutputCollector[_,_],_,_] = 
+    HadoopSchemeInstance(new AvroScheme(schema.getOrElse(null))).asInstanceOf[Scheme[org.apache.hadoop.mapred.JobConf,org.apache.hadoop.mapred.RecordReader[_,_],org.apache.hadoop.mapred.OutputCollector[_,_],_,_]] 
 
   override val localScheme = new TextDelimited(Fields.ALL)
 
@@ -36,7 +40,8 @@ trait UnpackedAvroFileScheme extends Source {
 trait PackedAvroFileScheme[AvroType] extends Mappable[AvroType] {
   val schema : Schema
 
-  override def hdfsScheme = HadoopSchemeInstance(new PackedAvroScheme[AvroType](schema))
+  override def hdfsScheme: Scheme[JobConf,RecordReader[_,_],OutputCollector[_,_],_,_] = 
+    HadoopSchemeInstance(new PackedAvroScheme[AvroType](schema)).asInstanceOf[Scheme[org.apache.hadoop.mapred.JobConf,org.apache.hadoop.mapred.RecordReader[_,_],org.apache.hadoop.mapred.OutputCollector[_,_],_, _]]
 }
 
 object TypedUnpackedAvroSource {
